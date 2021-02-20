@@ -1,6 +1,6 @@
 <p align="center">
-  <img title='Ngobrol mascot by @eejitlikeme'
-       src="https://jam.systems/img/jam.jpg"
+  <img title='Ngobrol logo by @tommy-maulana'
+       src="https://github.com/tommy-maulana/ngobrol/blob/main/ngobrol-logo.png"
        width="300"
        height="300"/>
 </p>

@@ -1,0 +1,74 @@
+version: '3'
+services:
+  coturn:
+    image: woahbase/alpine-coturn
+    volumes:
+      - "./turnserver.conf:/var/lib/coturn/turnserver.conf"
+    network_mode: host
+  postgres:
+    image: postgres:12
+    restart: always
+    environment:
+      POSTGRES_USER: jam
+      POSTGRES_PASSWORD: jam
+    volumes:
+      - ../data/postgres:/var/lib/postgresql/data
+  ui:
+    image: registry.gitlab.com/jam-systems/jam/ui:${CHANNEL}
+    restart: always
+    env_file:
+      - ".env"
+    labels:
+      - traefik.http.routers.ui.rule=Host(`${JAM_HOST}`)
+      - traefik.http.routers.ui.tls=true
+      - traefik.http.routers.ui.tls.certresolver=letsencrypt
+      - traefik.enable=true
+  pantryredis:
+    image: library/redis
+    volumes:
+      - "../pantryredis:/data"
+    command: "redis-server --appendonly yes"
+  pantry:
+    image: registry.gitlab.com/jam-systems/jam/pantry:${CHANNEL}
+    restart: always
+    env_file:
+      - ".env"
+    labels:
+      - traefik.http.routers.pantry.rule=Host(`pantry.${JAM_HOST}`)
+      - traefik.http.routers.pantry.tls=true
+      - traefik.http.routers.pantry.tls.certresolver=letsencrypt
+      - traefik.enable=true
+  signalhub:
+    image: registry.gitlab.com/jam-systems/jam/signalhub:${CHANNEL}
+    restart: always
+    labels:
+      - traefik.http.routers.signalhub.rule=Host(`signalhub.${JAM_HOST}`)
+      - traefik.http.routers.signalhub.tls=true
+      - traefik.http.routers.signalhub.tls.certresolver=letsencrypt
+      - traefik.enable=true
+  traefik:
+    hostname: traefik
+    image: traefik
+    restart: always
+    command:
+      - "--entryPoints.web.address=:80"
+      - "--entryPoints.websecure.address=:443"
+      - "--certificatesResolvers.letsencrypt.acme.email=admin@${JAM_HOST}"
+      - "--certificatesResolvers.letsencrypt.acme.storage=/acme/acme.json"
+      - "--certificatesResolvers.letsencrypt.acme.httpChallenge.entryPoint=web"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedByDefault=false"
+    labels:
+      traefik.http.routers.http-catchall.rule: hostregexp(`{host:.+}`)
+      traefik.http.routers.http-catchall.entrypoints: web
+      traefik.http.routers.http-catchall.middlewares: redirect-to-https@docker
+      traefik.http.middlewares.redirect-to-https.redirectscheme.scheme: https
+      traefik.enable: "true"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../data/traefik/acme:/acme
+
+

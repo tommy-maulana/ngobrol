@@ -1,0 +1,89 @@
+image: docker:git
+services:
+  - docker:dind
+
+variables:
+  DOCKER_NAMESPACE: registry.gitlab.com/jam-systems/jam
+  DEPLOYMENT_PATH: /root/jam/deployment
+
+stages:
+  - build
+  - deploy
+
+build-pantry:
+  stage: build
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t $DOCKER_NAMESPACE/pantry:${CI_COMMIT_REF_SLUG} pantry
+    - docker push $DOCKER_NAMESPACE/pantry:${CI_COMMIT_REF_SLUG}
+  only:
+    refs:
+      - master
+      - stable
+    changes:
+      - pantry/**/*
+      - .gitlab-ci.yml
+
+
+build-signalhub:
+  stage: build
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t $DOCKER_NAMESPACE/signalhub:${CI_COMMIT_REF_SLUG} signalhub
+    - docker push $DOCKER_NAMESPACE/signalhub:${CI_COMMIT_REF_SLUG}
+  only:
+    refs:
+      - master
+      - stable
+    changes:
+      - signalhub/**/*
+      - .gitlab-ci.yml
+
+build-ui:
+  stage: build
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t $DOCKER_NAMESPACE/ui:${CI_COMMIT_REF_SLUG} ui
+    - docker push $DOCKER_NAMESPACE/ui:${CI_COMMIT_REF_SLUG}
+  only:
+    refs:
+      - master
+      - stable
+    changes:
+      - ui/**/*
+      - .gitlab-ci.yml
+
+
+update-beta-server:
+  stage: deploy
+  only:
+    refs:
+      - master
+  variables:
+    GIT_STRATEGY: none
+    DEPLOYMENT_HOST: beta.jam.systems
+  script:
+    - eval $(ssh-agent -s)
+    - echo "$DEPLOY_KEY" | tr -d '\r' | ssh-add - > /dev/null
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan $DEPLOYMENT_HOST >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - ssh root@$DEPLOYMENT_HOST "cd $DEPLOYMENT_PATH && git pull && docker-compose pull && docker-compose up -d && exit"
+
+update-prod-server:
+  stage: deploy
+  only:
+    refs:
+      - stable
+  variables:
+    GIT_STRATEGY: none
+    DEPLOYMENT_HOST: jam.systems
+  script:
+    - eval $(ssh-agent -s)
+    - echo "$DEPLOY_KEY" | tr -d '\r' | ssh-add - > /dev/null
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan $DEPLOYMENT_HOST >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - ssh root@$DEPLOYMENT_HOST "cd $DEPLOYMENT_PATH && git pull && docker-compose pull && docker-compose up -d && exit"

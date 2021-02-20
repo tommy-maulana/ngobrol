@@ -1,15 +1,15 @@
 <p align="center">
-  <img title='Jam mascot by @eejitlikeme'
+  <img title='Ngobrol mascot by @eejitlikeme'
        src="https://jam.systems/img/jam.jpg"
        width="300"
        height="300"/>
 </p>
 
-# Jam
+# Ngobrol
 
-Jam is an Open Source alternative to Clubhouse, Twitter Spaces and similar audio spaces.
+Ngobrol is an Open Source alternative to Clubhouse, Twitter Spaces and similar audio spaces.
 
-With Jam you can create `Jams` which are audio rooms that can be used for panel discussions, jam sessions, free flowing conversations, debates, theatre plays, musicals and more. The only limit is your imagination.
+With Ngobrol you can create `Obrolan` which are audio rooms that can be used for panel discussions, Ngobrol sessions, free flowing conversations, debates, theatre plays, musicals and more. The only limit is your imagination.
 
 [https://jam.systems/](https://jam.systems/)
 
@@ -23,7 +23,7 @@ With Jam you can create `Jams` which are audio rooms that can be used for panel 
 
 ## Host Your Own Server
 
-Hosting your own Jam server is easy.
+Hosting your own Ngobrol server is easy.
 
 1. Install docker and docker-compose (eg. `apt install docker.io docker-compose`)
 2. `git clone https://gitlab.com/jam-systems/jam.git`

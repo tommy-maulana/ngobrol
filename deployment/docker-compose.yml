@@ -47,7 +47,7 @@ services:
       - traefik.http.routers.signalhub.tls.certresolver=letsencrypt
       - traefik.enable=true
   traefik:
-    hostname: traefik
+    hostname: rumpi.ilifest.co
     image: traefik
     restart: always
     command:

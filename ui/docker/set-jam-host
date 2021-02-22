@@ -1,4 +1,4 @@
 #!/bin/sh
-echo "Setting jam host to ${116.203.130.211}..."
-sed -i "s/__JAM_HOST__/${116.203.130.211}/g" bundle.js
+echo "Setting jam host to ${JAM_HOST}..."
+sed -i "s/__JAM_HOST__/${JAM_HOST}/g" bundle.js
 echo '...done'
